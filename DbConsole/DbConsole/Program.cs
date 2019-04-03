@@ -80,15 +80,29 @@ namespace DbConsole
     {
         static void Main(string[] args)
         {
+            string name;
+            Console.Write("Yhdistyksen nimi: ");
+            name = Console.ReadLine();
+
+            Association association = new Association(0, name);
+            
+
             /*----------------------------------
              SQL SERVER CONNECTION DEFINITIONS
              ----------------------------------*/
 
             // Connection String
-            using (SqlConnection sqlConnection = new SqlConnection("Data Source=10.66.0.16\\STARA-MSSQL; Initial Catalog=Members; User=sa; Password=Q2werty"))
+            using (SqlConnection sqlConnection = new SqlConnection("Data Source=localhost\\SQLEXPRESS; Initial Catalog=Members; Integrated Security=true"))
             {
                 sqlConnection.Open();
-                Console.WriteLine(sqlConnection.ServerVersion);
+
+                // SQL Clause for inserting an Association
+
+                string command = "INSERT INTO dbo.Association (name) VALUES (";
+                string parameters = "'" + association.name + "');";
+                SqlCommand sqlCommand = new SqlCommand(command + parameters, sqlConnection);
+                sqlCommand.ExecuteNonQuery();
+                // Console.WriteLine(sqlConnection.ServerVersion);
                 sqlConnection.Close();
 
             }
