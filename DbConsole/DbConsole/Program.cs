@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 // Classes for SQL Data and management
-using System.Data;
 using System.Data.SqlClient;
 
 namespace DbConsole
@@ -40,7 +35,7 @@ namespace DbConsole
         public uint memberId;
         public string firstName;
         public string lastName;
-        public DateTime joined;
+        
 
         // Default constructor
         public Member()
@@ -48,16 +43,14 @@ namespace DbConsole
             this.memberId = 0;
             this.firstName = "N/A";
             this.lastName = "N/A";
-            this.joined = DateTime.Now;
         }
 
         // Constructor with all arguments
-        public Member(uint id, string first, string last, DateTime joined)
+        public Member(uint id, string first, string last)
         {
             this.memberId = id;
             this.firstName = first;
-            this.lastName = last;
-            this.joined = joined;
+            this.lastName = last;  
         }
     }
 
@@ -66,12 +59,14 @@ namespace DbConsole
         public uint membershipId;
         public uint associationNumber;
         public uint memberNumber;
+        public DateTime joined;
 
-        Membership(uint id, uint aNumber, uint mNumber)
+        public Membership(uint id, uint aNumber, uint mNumber)
         {
             this.membershipId = id;
             this.associationNumber = aNumber;
             this.memberNumber = mNumber;
+            this.joined = DateTime.Now;
 
         }
 
@@ -80,11 +75,37 @@ namespace DbConsole
     {
         static void Main(string[] args)
         {
+            /* Create an new association */
             string name;
             Console.Write("Yhdistyksen nimi: ");
             name = Console.ReadLine();
 
             Association association = new Association(0, name);
+
+            /* Create a new member */
+            string givenname;
+            string surname;
+            Console.Write("Etunimi: ");
+            givenname = Console.ReadLine();
+            Console.Write("Sukunimi: ");
+            surname = Console.ReadLine();
+            Member member = new Member(0, givenname, surname);
+
+            /* Create a new membership */
+            string associdStr;
+            string memberidStr;
+            uint associd;
+            uint memberid;
+            Console.WriteLine("Lisätään jäsen yhdistykseen");
+            Console.Write("Yhdistysnumero on ");
+            associdStr = Console.ReadLine();
+            Console.Write("Jäsennumero on ");
+            memberidStr = Console.ReadLine();
+            associd = Convert.ToUInt32(associdStr);
+            memberid = Convert.ToUInt32(memberidStr);
+
+            Membership membership = new Membership(0, associd, memberid);
+
             
 
             /*----------------------------------
@@ -102,6 +123,22 @@ namespace DbConsole
                 string parameters = "'" + association.name + "');";
                 SqlCommand sqlCommand = new SqlCommand(command + parameters, sqlConnection);
                 sqlCommand.ExecuteNonQuery();
+
+                /* SQL Clause for inserting a Member */
+                string command2 = "INSERT INTO dbo.member (first_name, last_name) VALUES (";
+                string parameters2 = "'" + member.firstName + "', '" + member.lastName + "');";
+                //Console.WriteLine(command2 + parameters2);
+                SqlCommand sqlCommand2 = new SqlCommand(command2 + parameters2, sqlConnection);
+                sqlCommand2.ExecuteNonQuery();
+
+                /* SQL Clause for defining a Membership 
+                 Ids should be in the database. Use existing ids only */
+
+                string command3 = "INSERT INTO dbo.membership (memberid, association_id, joined) VALUES (" + membership.memberNumber.ToString() + ", " + membership.associationNumber.ToString() + ", " + membership.joined.ToString() + ");";
+                // string parameters3 = " membership.memberNumber + ", " + membership.associationNumber + ", " + membership.joined + "');";
+                SqlCommand sqlCommand3 = new SqlCommand(command3, sqlConnection);
+                sqlCommand3.ExecuteNonQuery();
+
                 // Console.WriteLine(sqlConnection.ServerVersion);
                 sqlConnection.Close();
 
